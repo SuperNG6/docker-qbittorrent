@@ -25,8 +25,7 @@ __当前的镜像或多或少都有以下几点不符合的我的需求__
 - 超小镜像体积 84.64 MB
 - 开放了BT下载DTH监听端口、BT下载监听端口（TCP/UDP 6881），加快下载速度
 - 默认开启DHT并且创建了DHT文件，加速下载
-- 包含了下载完成后自动删除.aria2文件脚本
-- 包含了执行删除正在下载任务事时自动执行删除文件（删除已完成的任务不会删除文件，请放心）和aria2文件的脚本
+- 自动更新trackers
 - 静态编译qBittorrent（来自[userdocs/qbittorrent-nox-static](https://github.com/userdocs/qbittorrent-nox-static)，感谢）
 - 内置400多条最新trackers（来自[XIU2 / TrackersListCollection](https://github.com/XIU2/TrackersListCollection)，感谢）
 - 默认上海时区 Asia/Shanghai
