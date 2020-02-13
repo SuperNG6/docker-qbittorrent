@@ -1,7 +1,7 @@
 # Docker qBittorrent的最佳实践
+博客：https://sleele.com  
 Docker Hub：https://hub.docker.com/r/superng6/qbittorrent  
 GitHub：https://github.com/SuperNG6/Docker-qBittorrent  
-博客：https://sleele.com
 
 
 # 之所以构建这个镜像的原因
