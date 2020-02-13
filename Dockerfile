@@ -1,6 +1,5 @@
-FROM debian:buster-slim as compiling
+FROM debian:buster-slim as confimage
 
-# compiling qB
 # set version label
 ARG LIBTORRENT_VER=_1_2
 ARG QBITTORRENT_VER=4.2.1
@@ -30,8 +29,8 @@ ENV WEBUIPORT=8080
 
 # add local files and install qbitorrent s6
 COPY root /
-COPY --from=compiling  /qbittorrent  /
-COPY --from=compiling  /s6 /
+COPY --from=confimage  /qbittorrent  /
+COPY --from=confimage  /s6 /
 
 # install python3
 RUN	apt-get -y update \
