@@ -23,6 +23,10 @@ RUN apt-get -y update \
 # docker qBittorrent
 FROM debian:buster-slim
 
+# environment variables
+ENV PS1="$(whoami)@$(hostname):$(pwd)$ " \
+HOME="/root" \
+TERM="xterm"
 # environment settings
 ENV TZ=Asia/Shanghai
 ENV WEBUIPORT=8080
