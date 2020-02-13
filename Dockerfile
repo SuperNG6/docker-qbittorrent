@@ -23,13 +23,10 @@ RUN apt-get -y update \
 # docker qBittorrent
 FROM debian:buster-slim
 
-# environment variables
-ENV PS1="$(whoami)@$(hostname):$(pwd)$ " \
-HOME="/root" \
-TERM="xterm"
 # environment settings
 ENV TZ=Asia/Shanghai
 ENV WEBUIPORT=8080
+ENV PUID=1026 PGID=100
 
 # add local files and install qbitorrent s6
 COPY root /
