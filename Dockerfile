@@ -1,13 +1,13 @@
 # docker qBittorrent
 FROM lsiobase/alpine:3.10
 
-# set label
-LABEL build_version="SuperNG6.qbittorrent:- ${QBITTORRENT_VER}"
-LABEL maintainer="SuperNG6"
-
 # set version label
 ARG LIBTORRENT_VER=_1_2
 ARG QBITTORRENT_VER=4.2.1
+
+# set label
+LABEL build_version="SuperNG6.qbittorrent:- ${QBITTORRENT_VER}"
+LABEL maintainer="SuperNG6"
 
 # environment settings
 ENV TZ=Asia/Shanghai \
