@@ -13,6 +13,6 @@ jobs:
               publish: true
               imageName: superng6/qbittorrent
               platform: linux/amd64
-              tag: alpine
+              tag: latest
               dockerHubUser: ${{ secrets.DOCKER_USERNAME }}
               dockerHubPassword: ${{ secrets.DOCKER_PASSWORD }}
