@@ -1,5 +1,5 @@
 # Docker qBittorrent 中国优化版
-博客：https://sleele.com/2020/04/09/docker-qbittorrent-optimizing/
+博客：https://sleele.com/2020/04/09/docker-qbittorrent-optimizing  
 Docker Hub：https://hub.docker.com/r/superng6/qbittorrent  
 GitHub：https://github.com/SuperNG6/Docker-qBittorrent  
 
