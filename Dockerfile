@@ -12,7 +12,7 @@ WEBUIPORT=8080 \
 PUID=1026 PGID=100
 
 # add local files and install qbitorrent s6
-COPY root/config/qBittorrent/qBitorrent.conf /config/qBittorrent/
+COPY root/ /config/qBittorrent/
 
 # ports and volumes
 VOLUME /downloads /config
