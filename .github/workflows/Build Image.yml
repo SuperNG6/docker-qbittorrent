@@ -1,4 +1,4 @@
-name: Build Amd64 Image
+name: Build Image
 on: push
 jobs:
   build:
