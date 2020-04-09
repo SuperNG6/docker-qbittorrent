@@ -11,8 +11,8 @@ ENV TZ=Asia/Shanghai \
 WEBUIPORT=8080 \
 PUID=1026 PGID=100
 
-# add local files and install qbitorrent s6
-COPY root/ /config/qBittorrent/
+# add conf
+COPY root/ /
 
 # ports and volumes
 VOLUME /downloads /config
