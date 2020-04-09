@@ -32,7 +32,7 @@ GitHub：https://github.com/SuperNG6/Docker-qBittorrent
       2、基于`linuxserver/qbittorrent`构建，仅添加添加了配置文件，默认中文，上海时区
       3、自带优化后的config，减少设置，开箱即用
       4、稳定，由`linuxserver/qbittorrent`维护
-      5、每周一自动拉去镜像`qbittorrent`构建
+      5、每周一拉取`linuxserver/qbittorrent`最新镜像。自动构建构建，保持最新
       
 ## 2020/02/03
 
