@@ -1,9 +1,6 @@
 # docker qBittorrent
-FROM lsiobase/alpine:3.10
+FROM linuxserver/qbittorrent
 
-# set version label
-ARG LIBTORRENT_VER=_1_2
-ARG QBITTORRENT_VER=4.2.1
 
 # set label
 LABEL build_version="SuperNG6.qbittorrent:- ${QBITTORRENT_VER}"
@@ -15,13 +12,7 @@ WEBUIPORT=8080 \
 PUID=1026 PGID=100
 
 # add local files and install qbitorrent s6
-COPY root /
-
-# install python3
-RUN apk add --no-cache python3 \
-&&	wget --no-check-certificate -O /usr/local/bin/qbittorrent-nox https://git.io/JvLcC \
-# chmod a+x qbittorrent-nox
-&&	chmod a+x /usr/local/bin/qbittorrent-nox  
+COPY root/config/qBittorrent/qBitorrent.conf /config/qBittorrent/
 
 # ports and volumes
 VOLUME /downloads /config
