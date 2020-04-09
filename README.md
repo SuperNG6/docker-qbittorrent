@@ -42,7 +42,8 @@ GitHub：https://github.com/SuperNG6/Docker-qBittorrent
       4、优化conf配置
       5、默认简体中文
       
-
+# review
+![C7Zi1U](https://cdn.jsdelivr.net/gh/SuperNG6/pic@master/uPic/C7Zi1U.png)
 
 # Document
 
