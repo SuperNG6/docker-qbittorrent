@@ -1,4 +1,4 @@
-# Docker qBittorrent 未完善
+# Docker qBittorrent 中国优化版
 博客：https://sleele.com  
 Docker Hub：https://hub.docker.com/r/superng6/qbittorrent  
 GitHub：https://github.com/SuperNG6/Docker-qBittorrent  
