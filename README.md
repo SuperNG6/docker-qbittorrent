@@ -4,29 +4,14 @@ Docker Hub：https://hub.docker.com/r/superng6/qbittorrent
 GitHub：https://github.com/SuperNG6/Docker-qBittorrent  
 
 
-# 之所以构建这个镜像的原因
-__当前的镜像或多或少都有以下几点不符合的我的需求__
-   
-- 没有配置UID和GID
-  > 这关系到你下载的文件的权限问题，默认是root权限，很难管理
-- 镜像体积大
-   > 大量qBittorrent images都在使用完整版ubuntu做基础基础镜像
-   > 本镜像使用lsiobase/alpine:3.10作为基础镜像
-   > 很多镜像使用alpine作为编译镜像，性能下降，使用`glibc`拒绝`musl`，Debian10下静态编译qBittorrent
- - 端口不全
-   > 下载速度息息相关的BT下载DTH监听端口、BT下载监听端口，需要expose出来
-
-   
 # 本镜像的一些优点
-- 全平台架构`x86-64`、`arm64`
+- 全平台架构`x86-64`、`arm64`、`arm32`
 - 默认简体中文
 - 做了usermapping，使用你自己的账户权限来运行，这点对于群辉来说尤其重要
 - 纯qBittorrent，没有包含多于的服务
-- 超小镜像体积 46.27 MB
+- 基于`linuxserver/qbittorrent`,每周构建一次，同步更新最新版本qbittorrent
 - 开放了BT下载DTH监听端口、BT下载监听端口（TCP/UDP 6881），加快下载速度
-- 默认开启DHT并且创建了DHT文件，加速下载
-- 自动更新trackers
-- 静态编译qBittorrent（来自[userdocs/qbittorrent-nox-static](https://github.com/userdocs/qbittorrent-nox-static)，感谢）
+- 默认开启DHT，加速下载
 - 内置400多条最新trackers（来自[XIU2 / TrackersListCollection](https://github.com/XIU2/TrackersListCollection)，感谢）
 - 默认上海时区 Asia/Shanghai
 
@@ -34,12 +19,21 @@ __当前的镜像或多或少都有以下几点不符合的我的需求__
 
 | Architecture | Tag            |
 | ------------ | -------------- |
-| x86-64       | amd64-latest   |
-| arm64        | arm64v8-latest |
+| x86-64       | latest   |
+| arm64        | latest |
+| arm32        | latest |
 
 
 
 # Changelogs
+## 2020/04/09
+
+      1、放弃之前自编译方案
+      2、基于`linuxserver/qbittorrent`构建，仅添加添加了配置文件，默认中文，上海时区
+      3、自带优化后的config，减少设置，开箱即用
+      4、稳定，由`linuxserver/qbittorrent`维护
+      5、每周一自动拉去镜像`qbittorrent`构建
+      
 ## 2020/02/03
 
       1、第一次提交
