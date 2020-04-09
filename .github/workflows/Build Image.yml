@@ -1,5 +1,13 @@
 name: Build Image
-on: push
+on: 
+  push: 
+  branches:
+    - master
+  paths-ignore:
+    - README.md
+  schedule:
+    - cron: 0 8 * * 1
+
 jobs:
   build:
       runs-on: ubuntu-latest
