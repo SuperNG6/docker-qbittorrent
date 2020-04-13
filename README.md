@@ -14,6 +14,7 @@ GitHub：https://github.com/SuperNG6/Docker-qBittorrent
 - 默认开启DHT，加速下载
 - 内置400多条最新trackers（来自[XIU2 / TrackersListCollection](https://github.com/XIU2/TrackersListCollection)，感谢）
 - 默认上海时区 Asia/Shanghai
+- 启动容器时自动更新trackers
 
 # Architecture
 
@@ -29,7 +30,7 @@ GitHub：https://github.com/SuperNG6/Docker-qBittorrent
 ## 2020/04/13
 
       1、添加启动容器时自动更新trackers功能（脚本修改自gshang2017,感谢）
-      
+
 ## 2020/04/09
 
       1、放弃之前自编译方案
