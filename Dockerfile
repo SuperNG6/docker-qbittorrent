@@ -1,7 +1,6 @@
 # docker qBittorrent
 FROM linuxserver/qbittorrent
 
-
 # set label
 LABEL build_version="SuperNG6.qbittorrent:- ${QBITTORRENT_VER}"
 LABEL maintainer="SuperNG6"
@@ -9,7 +8,8 @@ LABEL maintainer="SuperNG6"
 # environment settings
 ENV TZ=Asia/Shanghai \
 WEBUIPORT=8080 \
-PUID=1026 PGID=100
+PUID=1026 PGID=100 \
+UT=true
 
 # add conf
 COPY root/ /
