@@ -26,6 +26,10 @@ GitHub：https://github.com/SuperNG6/Docker-qBittorrent
 
 
 # Changelogs
+## 2020/04/13
+
+      1、添加启动容器时自动更新trackers功能（脚本修改自gshang2017,感谢）
+      
 ## 2020/04/09
 
       1、放弃之前自编译方案
