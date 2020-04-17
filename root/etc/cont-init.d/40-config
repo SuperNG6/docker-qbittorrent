@@ -2,7 +2,7 @@
 
 if [ "$UT" == "YES" ];then
 
-curl -so  /tmp/trackers_all.txt https://raw.githubusercontent.com/XIU2/TrackersListCollection/master/all.txt
+curl -so  /tmp/trackers_all.txt https://cdn.jsdelivr.net/gh/XIU2/TrackersListCollection/all.txt
 Newtrackers="Bittorrent\TrackersList=$(awk '{if(!NF){next}}1'  /tmp/trackers_all.txt|sed ':a;N;s/\n/\\n/g;ta' )"
 Oldtrackers="`grep  TrackersList=  /config/qBittorrent/qBittorrent.conf`" 
 echo $Newtrackers >/tmp/Newtrackers.txt
