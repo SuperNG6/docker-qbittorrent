@@ -1,6 +1,6 @@
 #!/usr/bin/with-contenv bash
 
-if [ "$UT" == "YES" ];then
+if [ "$UT" == "true" ];then
 
 curl -so  /tmp/trackers_all.txt https://cdn.jsdelivr.net/gh/XIU2/TrackersListCollection/all.txt
 Newtrackers="Bittorrent\TrackersList=$(awk '{if(!NF){next}}1'  /tmp/trackers_all.txt|sed ':a;N;s/\n/\\n/g;ta' )"
