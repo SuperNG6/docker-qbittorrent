@@ -2,12 +2,11 @@
 FROM linuxserver/qbittorrent
 
 # set label
-LABEL build_version="SuperNG6.qbittorrent:- ${QBITTORRENT_VER}"
 LABEL maintainer="SuperNG6"
 
 # environment settings
 ENV TZ=Asia/Shanghai \
-WEBUIPORT=8080 \
+WEBUI_PORT=8080 \
 PUID=1026 PGID=100 \
 UT=true
 
