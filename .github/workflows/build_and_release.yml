@@ -92,7 +92,7 @@ jobs:
 
       - name: Upload Github Assets
         uses: softprops/action-gh-release@v1
-        if: steps.upx-pack.outputs.status == 'success'
+        if: steps.zip-pack.outputs.status == 'success'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -229,7 +229,7 @@ jobs:
           cp -fv "${CROSS_PREFIX}/bin/qbittorrent-nox" /tmp/
 
       - name: zip archiving
-        id: upx-pack
+        id: zip-pack
         env:
           CROSS_HOST: "${{ matrix.cross_host }}"
         run: |
@@ -239,7 +239,7 @@ jobs:
 
       - name: Upload Github Assets
         uses: softprops/action-gh-release@v1
-        if: steps.upx-pack.outputs.status == 'success'
+        if: steps.zip-pack.outputs.status == 'success'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
