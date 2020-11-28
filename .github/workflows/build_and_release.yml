@@ -1,3 +1,5 @@
+name: build_and_release
+
 on:
   workflow_dispatch:
 
