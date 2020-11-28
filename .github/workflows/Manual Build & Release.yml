@@ -1,9 +1,7 @@
-name: Build and Release
+name: Manual Build and Release
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '30 19 * * *'
 
 jobs:
   # Inspired by https://github.com/userdocs/qbittorrent-nox-static/blob/master/qbittorrent-nox-static-musl.sh

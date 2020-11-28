@@ -1,0 +1,286 @@
+name: Auto Build and Release
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 19 * * *'
+
+jobs:
+  # Inspired by https://github.com/userdocs/qbittorrent-nox-static/blob/master/qbittorrent-nox-static-musl.sh
+  nox-static:
+    runs-on: ubuntu-latest
+    container: "alpine:latest"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # 获得仓库中的ReleaseTag
+      - name: Set Version
+        id: set-version
+        run: |
+          echo "::set-output name=version::$(cat ReleaseTag | head -n1)"
+          echo "ReleaseTag=$(cat ReleaseTag | head -n1)"
+
+      # 缓存release tag，用作与下一次执行任务时获取到到release tag做对比
+      - name: Cache tag
+        id: cache-tag
+        uses: actions/cache@v2
+        with:
+          path: ./tag/
+          key: ${{ runner.os }}-tag-${{ steps.set-version.outputs.version }}
+
+      # 获取将latest release tag，未命中缓存则更新ReleaseTag
+      - name: Get latest release tag
+        id: get-release-tag
+        if: steps.cache-tag.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ./tag
+          echo ${{ steps.set-version.outputs.version }} > ./tag/tag-${{ steps.set-version.outputs.version }}
+          echo "::set-output name=status::success"
+
+      - name: Install build dependencies
+        if: steps.get-release-tag.outputs.status == 'success'
+        run: |
+          apk add g++ \
+            git \
+            make \
+            file \
+            autoconf \
+            automake \
+            libtool \
+            boost-static \
+            boost-dev \
+            openssl-dev \
+            openssl-libs-static \
+            tar \
+            jq \
+            zlib-dev \
+            zlib-static
+
+      - name: Build nox-static
+        if: steps.get-release-tag.outputs.status == 'success'
+        env:
+          # Use qt version match this prefix. Valid value format: x, x.y, x.y.z
+          QT_VER_PREFIX: "5"
+        run: |
+          export CXXFLAGS="-std=c++14"
+          qt_tag="$(wget -qO- https://api.github.com/repos/qt/qtbase/tags | jq -r "[.[].name | select(test(\"^v${QT_VER_PREFIX}(\\\.\\\d+)*$\"))] | max")"
+          [ -d /tmp/qtbase/ ] || \
+            git clone --branch "${qt_tag}" --recursive -j$(nproc) --depth 1 https://github.com/qt/qtbase.git "/tmp/qtbase"
+          cd /tmp/qtbase
+          ./configure --prefix=/usr/local/ -optimize-size -silent --openssl-linked \
+            -static -opensource -confirm-license -release -c++std c++14 -no-opengl \
+            -no-dbus -no-widgets -no-gui -no-compile-examples -ltcg -make libs -no-pch \
+            -nomake tests -nomake examples -no-xcb -silent -no-feature-testlib
+          make -j$(nproc)
+          make install
+          [ -d /tmp/qttools ] || \
+            git clone --branch "${qt_tag}" --recursive -j$(nproc) --depth 1 https://github.com/qt/qttools.git "/tmp/qttools"
+          cd /tmp/qttools
+          qmake -set prefix "/usr/local/"
+          qmake
+          make -j$(nproc)
+          make install
+          mkdir -p /tmp/libtorrent-rasterbar
+          [ -f /tmp/libtorrent-rasterbar/.unpack_ok ] || \
+            wget -qO- https://github.com/arvidn/libtorrent/archive/RC_1_2.tar.gz | \
+            tar -zxf - -C /tmp/libtorrent-rasterbar --strip-components 1
+          touch "/tmp/libtorrent-rasterbar/.unpack_ok"
+          cd /tmp/libtorrent-rasterbar
+          ./bootstrap.sh
+          make -j$(nproc)
+          make install
+          wget --no-check-certificate https://github.com/qbittorrent/qBittorrent/archive/release-${{ steps.set-version.outputs.version }}.tar.gz
+          tar -xzf release-${{ steps.set-version.outputs.version }}.tar.gz
+          cd ./qBittorrent-release-${{ steps.set-version.outputs.version }}
+          ./configure --disable-gui LDFLAGS="-s -static --static"
+          make -j$(nproc)
+          make install
+
+      - name: Zip archiving
+        if: steps.get-release-tag.outputs.status == 'success'
+        id: archiving
+        run: |
+          apk add zip
+          zip -j9v /tmp/qbittorrent-nox_linux_x64_static.zip /usr/local/bin/qbittorrent-nox
+          echo "::set-output name=status::success"
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        if: steps.archiving.outputs.status == 'success'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: qBittorrent-${{ steps.set-version.outputs.version }}
+          tag_name: ${{ steps.set-version.outputs.version }}
+          prerelease: false
+          files: |
+            /tmp/*.zip
+
+  # cross compile for some other platforms, like arm, mips, etc.
+  cross-compile:
+    runs-on: ubuntu-latest
+    container: "alpine:latest"
+    strategy:
+      matrix:
+        include:
+          # cross toolchain downloads from: https://musl.cc/
+          # you need to find the name ${cross_host}-cross.tgz
+          # openssl_compiler choose from openssl source directory `./Configure LIST`
+          # qt_device choose from https://github.com/qt/qtbase/tree/dev/mkspecs/devices
+          - cross_host: arm-linux-musleabi
+            openssl_compiler: linux-armv4
+            qt_device: linux-arm-generic-g++
+          - cross_host: aarch64-linux-musl
+            openssl_compiler: linux-aarch64
+            qt_device: linux-arm-generic-g++
+          - cross_host: mips-linux-musl
+            openssl_compiler: linux-mips32
+            qt_device: linux-generic-g++
+          - cross_host: mipsel-linux-musl
+            openssl_compiler: linux-mips32
+            qt_device: linux-generic-g++
+          - cross_host: mips64-linux-musl
+            openssl_compiler: linux64-mips64
+            qt_device: linux-generic-g++
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # 获得仓库中的ReleaseTag
+      - name: Set Version
+        id: set-version
+        run: |
+          echo "::set-output name=version::$(cat ReleaseTag | head -n1)"
+          echo "ReleaseTag=$(cat ReleaseTag | head -n1)"
+
+      # 缓存release tag，用作与下一次执行任务时获取到到release tag做对比
+      - name: Cache tag
+        id: cache-tag
+        uses: actions/cache@v2
+        with:
+          path: ./tag/
+          key: ${{ runner.os }}-tag-${{ steps.set-version.outputs.version }}
+
+      # 获取将latest release tag，未命中缓存则更新ReleaseTag
+      - name: Get latest release tag
+        id: get-release-tag
+        if: steps.cache-tag.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ./tag
+          echo ${{ steps.set-version.outputs.version }} > ./tag/tag-${{ steps.set-version.outputs.version }}
+          echo "::set-output name=status::success"
+
+      - name: Install build dependencies
+        if: steps.get-release-tag.outputs.status == 'success'
+        run: |
+          apk add gcc \
+            g++ \
+            git \
+            make \
+            file \
+            perl \
+            autoconf \
+            automake \
+            libtool \
+            tar \
+            jq \
+            pkgconfig \
+            linux-headers
+
+      - name: Cross compile nox-static
+        if: steps.get-release-tag.outputs.status == 'success'
+        env:
+          # Use qt version match this prefix. Valid value format: x, x.y, x.y.z
+          QT_VER_PREFIX: "5"
+          CROSS_HOST: "${{ matrix.cross_host }}"
+          OPENSSL_COMPILER: "${{ matrix.openssl_compiler }}"
+          QT_DEVICE: "${{matrix.qt_device}}"
+          LIBTORRENT_BRANCH: "RC_1_2"
+        run: |
+          mkdir -p /cross_root /usr/src/zlib /usr/src/openssl /usr/src/boost /usr/src/libtorrent
+          export PATH="/cross_root/bin:${PATH}"
+          export CROSS_PREFIX="/cross_root/${CROSS_HOST}"
+          export PKG_CONFIG_PATH="${CROSS_PREFIX}/opt/qt/lib/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
+          wget -qO- "https://musl.cc/${CROSS_HOST}-cross.tgz" | tar -zxf - --strip-components=1 -C /cross_root/
+          zlib_latest_url="$(wget -qO- https://api.github.com/repos/madler/zlib/tags | jq -r '.[0].tarball_url')"
+          wget -qO- "${zlib_latest_url}" | tar -zxf - --strip-components=1 -C /usr/src/zlib
+          cd /usr/src/zlib
+          CHOST="${CROSS_HOST}" ./configure --prefix="${CROSS_PREFIX}" --static
+          make -j$(nproc)
+          make install
+          openssl_file_name="$(wget -qO- https://github.com/openssl/openssl/releases | grep -o 'OpenSSL_1_1.*.tar.gz' | head -1)"
+          wget -qO- "https://github.com/openssl/openssl/archive/${openssl_file_name}" | tar -zxf - --strip-components=1 -C /usr/src/openssl
+          cd /usr/src/openssl
+          ./Configure -static --cross-compile-prefix="${CROSS_HOST}-" --prefix="${CROSS_PREFIX}" "${OPENSSL_COMPILER}"
+          make -j$(nproc)
+          make install_sw
+          boost_latest_url="$(wget -qO- https://www.boost.org/users/download/ | grep -o 'http[^"]*.tar.bz2' | head -1)"
+          wget -qO- "${boost_latest_url}" | tar -jxf - --strip-components=1 -C /usr/src/boost
+          cd /usr/src/boost
+          ./bootstrap.sh
+          sed -i "s/using gcc.*/using gcc : cross : ${CROSS_HOST}-g++ ;/" project-config.jam
+          ./b2 install --prefix="${CROSS_PREFIX}" --with-system toolset=gcc-cross variant=release link=static runtime-link=static
+          qt_tag="$(wget -qO- https://api.github.com/repos/qt/qtbase/tags | jq -r "[.[].name | select(test(\"^v${QT_VER_PREFIX}(\\\.\\\d+)*$\"))] | max")"
+          [ -d /usr/src/qtbase/ ] || \
+            git clone --branch "${qt_tag}" --recursive -j$(nproc) --depth 1 https://github.com/qt/qtbase.git "/usr/src/qtbase"
+          cd /usr/src/qtbase
+          # Remove some options no support by this toolchain
+          find -name '*.conf' -print0 | xargs -0 -r sed -i 's/-fno-fat-lto-objects//g'
+          find -name '*.conf' -print0 | xargs -0 -r sed -i 's/-fuse-linker-plugin//g'
+          find -name '*.conf' -print0 | xargs -0 -r sed -i 's/-mfloat-abi=softfp//g'
+          ./configure --prefix=/opt/qt/ -optimize-size -silent --openssl-linked \
+            -static -opensource -confirm-license -release -c++std c++14 -no-opengl \
+            -no-dbus -no-widgets -no-gui -no-compile-examples -ltcg -make libs -no-pch \
+            -nomake tests -nomake examples -no-xcb -no-feature-testlib \
+            -hostprefix /cross_root -device "${QT_DEVICE}" -device-option CROSS_COMPILE="${CROSS_HOST}-" \
+            -sysroot "${CROSS_PREFIX}"
+          make -j$(nproc)
+          make install
+          [ -d /usr/src/qttools ] || \
+            git clone --branch "${qt_tag}" --recursive -j$(nproc) --depth 1 https://github.com/qt/qttools.git "/usr/src/qttools"
+          cd /usr/src/qttools
+          qmake -set prefix "/cross_root"
+          qmake
+          # Remove some options no support by this toolchain
+          find -name '*.conf' -print0 | xargs -0 -r sed -i 's/-fno-fat-lto-objects//g'
+          find -name '*.conf' -print0 | xargs -0 -r sed -i 's/-fuse-linker-plugin//g'
+          find -name '*.conf' -print0 | xargs -0 -r sed -i 's/-mfloat-abi=softfp//g'
+          make -j$(nproc)
+          make install
+          cd /cross_root/bin
+          ln -sf lrelease "lrelease-qt${qt_tag:1:1}"
+          wget -qO- "https://github.com/arvidn/libtorrent/archive/${LIBTORRENT_BRANCH}.tar.gz" | tar -zxf - --strip-components=1 -C /usr/src/libtorrent
+          cd /usr/src/libtorrent
+          ./bootstrap.sh CXXFLAGS='-std=c++14' --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --with-boost="${CROSS_PREFIX}"
+          make -j$(nproc)
+          make install
+          wget --no-check-certificate https://github.com/qbittorrent/qBittorrent/archive/release-${{ steps.set-version.outputs.version }}.tar.gz
+          tar -xzf release-${{ steps.set-version.outputs.version }}.tar.gz
+          cd ./qBittorrent-release-${{ steps.set-version.outputs.version }}
+          ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-gui --with-boost="${CROSS_PREFIX}" CXXFLAGS='-std=c++14' LDFLAGS='-s -static --static'
+          make -j$(nproc)
+          make install
+          cp -fv "${CROSS_PREFIX}/bin/qbittorrent-nox" /tmp/
+
+      - name: Zip archiving
+        if: steps.get-release-tag.outputs.status == 'success'
+        id: archiving
+        env:
+          CROSS_HOST: "${{ matrix.cross_host }}"
+        run: |
+          apk add zip
+          zip -j9v /tmp/qbittorrent-nox_${CROSS_HOST}_static.zip /tmp/qbittorrent-nox
+          echo "::set-output name=status::success"
+
+      - name: Upload Github Assets
+        uses: softprops/action-gh-release@v1
+        if: steps.archiving.outputs.status == 'success'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: qBittorrent-${{ steps.set-version.outputs.version }}
+          tag_name: ${{ steps.set-version.outputs.version }}
+          prerelease: false
+          files: |
+            /tmp/*.zip

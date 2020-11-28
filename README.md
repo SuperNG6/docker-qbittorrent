@@ -9,10 +9,10 @@ GitHub：https://github.com/SuperNG6/Docker-qBittorrent
 - 默认简体中文
 - 做了usermapping，使用你自己的账户权限来运行，这点对于群辉来说尤其重要
 - 纯qBittorrent，没有包含多于的服务
-- 基于`linuxserver/qbittorrent`,每周构建一次，同步更新最新版本qbittorrent
+- 自编译静态版本，同步更新最新版本qbittorrent
 - 开放了BT下载DTH监听端口、BT下载监听端口（TCP/UDP 6881），加快下载速度
 - 默认开启DHT，加速下载
-- 内置400多条最新trackers（来自[XIU2 / TrackersListCollection](https://github.com/XIU2/TrackersListCollection)，感谢）
+- 自动更新trackers（来自[XIU2 / TrackersListCollection](https://github.com/XIU2/TrackersListCollection)，感谢）
 - 默认上海时区 Asia/Shanghai
 - 启动容器时自动更新trackers
 
@@ -27,6 +27,11 @@ GitHub：https://github.com/SuperNG6/Docker-qBittorrent
 
 
 # Changelogs
+## 2020/11/28
+
+      1、更换回自编译静态版本，减小镜像体积
+      2、增加版本控制，可以下载历史版本qbittorrent
+
 ## 2020/04/13
 
       1、添加启动容器时自动更新trackers功能（脚本修改自gshang2017,感谢）
