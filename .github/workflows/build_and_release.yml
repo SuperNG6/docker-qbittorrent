@@ -76,7 +76,6 @@ jobs:
           make install
       - name: upx compressing and zip archiving
         id: zip-pack
-        if: startsWith(github.ref, 'refs/tags/')
         run: |
           apk add zip
           zip -j9v /tmp/qbittorrent-nox_linux_x64_static.zip /usr/local/bin/qbittorrent-nox
