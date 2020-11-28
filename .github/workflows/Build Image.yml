@@ -1,12 +1,9 @@
 name: Build Image
+
 on:
-  push:
-    branches:
-      - 'master'      
-    paths-ignore:
-      - README.md
+  workflow_dispatch:
   schedule:
-    - cron: 0 8 * * 1
+    - cron: '0 8 * * 1'
 
 jobs:
   buildx:
