@@ -120,15 +120,15 @@ jobs:
           - cross_host: aarch64-linux-musl
             openssl_compiler: linux-aarch64
             qt_device: linux-arm-generic-g++
-          # - cross_host: mips-linux-musl
-          #   openssl_compiler: linux-mips32
-          #   qt_device: linux-generic-g++
-          # - cross_host: mipsel-linux-musl
-          #   openssl_compiler: linux-mips32
-          #   qt_device: linux-generic-g++
-          # - cross_host: mips64-linux-musl
-          #   openssl_compiler: linux64-mips64
-          #   qt_device: linux-generic-g++
+          - cross_host: mips-linux-musl
+            openssl_compiler: linux-mips32
+            qt_device: linux-generic-g++
+          - cross_host: mipsel-linux-musl
+            openssl_compiler: linux-mips32
+            qt_device: linux-generic-g++
+          - cross_host: mips64-linux-musl
+            openssl_compiler: linux64-mips64
+            qt_device: linux-generic-g++
     steps:
       - name: Checkout
         uses: actions/checkout@v2
