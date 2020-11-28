@@ -29,7 +29,7 @@ GitHub：https://github.com/SuperNG6/Docker-qBittorrent
 # Changelogs
 ## 2020/11/28
 
-      1、更换回自编译静态版本，减小镜像体积
+      1、更换回自编译静态版本，大幅减小镜像体积
       2、增加版本控制，可以下载历史版本qbittorrent
 
 ## 2020/04/13

@@ -1,8 +1,11 @@
 name: Manual Build and Release
 
 on:
+  push:
+    paths:
+      - "ReleaseTag"
   workflow_dispatch:
-
+  
 jobs:
   # Inspired by https://github.com/userdocs/qbittorrent-nox-static/blob/master/qbittorrent-nox-static-musl.sh
   nox-static:
