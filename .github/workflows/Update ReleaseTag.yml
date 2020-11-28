@@ -3,7 +3,7 @@ name: Update ReleaseTag
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 20 * * *'
+    - cron: '0 19 * * *'
 
 jobs:
   update:
