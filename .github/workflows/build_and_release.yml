@@ -212,6 +212,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      # 获得仓库中的ReleaseTag
+      - name: Set Version
+        id: set-version
+        run: |
+          echo "::set-output name=version::$(cat ReleaseTag | head -n1)"
+          echo "ReleaseTag=$(cat ReleaseTag | head -n1)"
+          
       - name: install build dependencies
         run: |
           apk add gcc \
