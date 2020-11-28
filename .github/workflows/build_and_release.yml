@@ -75,11 +75,13 @@ jobs:
           make -j$(nproc)
           make install
       - name: upx compressing and zip archiving
+        id: upx-zip
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           apk add upx zip
           upx --best -o /tmp/qbittorrent-nox /usr/local/bin/qbittorrent-nox
           zip -j9v /tmp/qbittorrent-nox_linux_x64_static.zip /tmp/qbittorrent-nox
+          echo "::set-output name=status::success"
       - name: Upload Github Assets
         if: startsWith(github.ref, 'refs/tags/')
         uses: svenstaro/upload-release-action@v2
@@ -88,6 +90,18 @@ jobs:
           file: /tmp/qbittorrent-nox_linux_x64_static.zip
           tag: ${{ github.ref }}
           overwrite: true
+
+      # - name: Upload Github Assets
+      #   uses: softprops/action-gh-release@v1
+      #   if: steps.upx-zip.outputs.status == 'success' && !cancelled()
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     name: qBittorrent Enhanced Edition-${{ steps.set-version.outputs.version }}
+      #     tag_name: ${{ steps.set-version.outputs.version }}
+      #     prerelease: false
+      #     files: |
+      #       /tmp/qbittorrent-nox_linux_x64_static.zip
 
   # cross compile for some other platforms, like arm, mips, etc.
   cross-compile:
