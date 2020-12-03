@@ -7,9 +7,8 @@ on:
 
 jobs:
   # Inspired by https://github.com/userdocs/qbittorrent-nox-static/blob/master/qbittorrent-nox-static-musl.sh
-  nox-static:
+  build-cache:
     runs-on: ubuntu-latest
-    container: "alpine:latest"
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -24,7 +23,7 @@ jobs:
       # 缓存release tag，用作与下一次执行任务时获取到到release tag做对比
       - name: Cache tag
         id: cache-tag
-        uses: actions/cache@v2.1.3
+        uses: actions/cache@v2
         with:
           path: ./tag/
           key: ${{ runner.os }}-tag-v${{ steps.set-version.outputs.version }}
@@ -37,6 +36,14 @@ jobs:
           mkdir -p ./tag
           echo ${{ steps.set-version.outputs.version }} > ./tag/tag-${{ steps.set-version.outputs.version }}
           echo "::set-output name=status::success"
+
+
+  nox-static:
+    runs-on: ubuntu-latest
+    container: "alpine:latest"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
       - name: Install build dependencies
         if: steps.get-release-tag.outputs.status == 'success'
