@@ -125,6 +125,37 @@ jobs:
             /tmp/*.zip
 
   # cross compile for some other platforms, like arm, mips, etc.
+
+  build-cache2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # 获得仓库中的ReleaseTag
+      - name: Set Version
+        id: set-version
+        run: |
+          echo "::set-output name=version::$(cat ReleaseTag | head -n1)"
+          echo "ReleaseTag=$(cat ReleaseTag | head -n1)"
+          
+      # 缓存release tag，用作与下一次执行任务时获取到到release tag做对比
+      - name: Cache tag
+        id: cache-tag
+        uses: actions/cache@v2
+        with:
+          path: ./tag/
+          key: ${{ runner.os }}-tag-v${{ steps.set-version.outputs.version }}
+
+      # 获取将latest release tag，未命中缓存则更新ReleaseTag
+      - name: Get latest release tag
+        id: get-release-tag
+        if: steps.cache-tag.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ./tag
+          echo ${{ steps.set-version.outputs.version }} > ./tag/tag-${{ steps.set-version.outputs.version }}
+          echo "::set-output name=status::success"
+
   cross-compile:
     runs-on: ubuntu-latest
     container: "alpine:latest"
@@ -150,33 +181,10 @@ jobs:
           - cross_host: mips64-linux-musl
             openssl_compiler: linux64-mips64
             qt_device: linux-generic-g++
+            
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      # 获得仓库中的ReleaseTag
-      - name: Set Version
-        id: set-version
-        run: |
-          echo "::set-output name=version::$(cat ReleaseTag | head -n1)"
-          echo "ReleaseTag=$(cat ReleaseTag | head -n1)"
-
-      # 缓存release tag，用作与下一次执行任务时获取到到release tag做对比
-      - name: Cache tag
-        id: cache-tag
-        uses: actions/cache@v2
-        with:
-          path: ./tag/
-          key: ${{ runner.os }}-tag-v${{ steps.set-version.outputs.version }}
-
-      # 获取将latest release tag，未命中缓存则更新ReleaseTag
-      - name: Get latest release tag
-        id: get-release-tag
-        if: steps.cache-tag.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p ./tag
-          echo ${{ steps.set-version.outputs.version }} > ./tag/tag-${{ steps.set-version.outputs.version }}
-          echo "::set-output name=status::success"
 
       - name: Install build dependencies
         if: steps.get-release-tag.outputs.status == 'success'
