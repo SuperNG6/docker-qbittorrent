@@ -27,6 +27,11 @@ GitHub：https://github.com/SuperNG6/Docker-qBittorrent
 
 
 # Changelogs
+## 2021/01/14
+
+      1、默认禁用Host header属性验证，很多人改变宿主机端口时发现无法访问webui就是这个原因
+
+# Changelogs
 ## 2020/11/28
 
       1、更换回自编译静态版本，大幅减小镜像体积
