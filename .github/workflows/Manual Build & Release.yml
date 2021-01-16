@@ -48,7 +48,11 @@ jobs:
           OPENSSL_COMPILER: "${{ matrix.openssl_compiler }}"
           QT_DEVICE: "${{ matrix.qt_device }}"
           QT_XPLATFORM: "${{matrix.qt_xplatform}}"
-        run: .github/workflows/cross_build.sh
+        run: |
+          chmod +x .github/workflows/cross_build.sh
+          .github/workflows/cross_build.sh
+
+
       - uses: actions/upload-artifact@v2
         with:
           name: qbittorrent-nox_${{ matrix.cross_host }}_static
