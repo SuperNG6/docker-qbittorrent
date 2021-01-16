@@ -204,8 +204,8 @@ unset LIBS CPPFLAGS
 # build qbittorrent
 cd "${SELF_DIR}/../../"
 
-wget https://github.com/qbittorrent/qBittorrent/archive/release-4.3.2.zip
-unzip qBittorrent-release-4.3.2.zip
+wget -q https://github.com/qbittorrent/qBittorrent/archive/release-4.3.2.zip
+unzip -q release-4.3.2.zip
 cp -r  qBittorrent-release-4.3.2/* ./
 
 if [ "${TARGET_HOST}" = 'win' ]; then
