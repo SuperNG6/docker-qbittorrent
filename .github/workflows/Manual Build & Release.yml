@@ -2,9 +2,8 @@ name: Manual Build and Release
 
 on:
   workflow_dispatch:
-  
-jobs:
 
+jobs:
   # cross compile for some other platforms, like arm, mips, etc.
   cross-compile:
     runs-on: ubuntu-latest
@@ -39,25 +38,33 @@ jobs:
           - cross_host: x86_64-w64-mingw32
             openssl_compiler: mingw64
             qt_xplatform: win32-g++
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      # 获得仓库中的ReleaseTag
+      - name: Set Version
+        id: set-version
+        run: |
+          echo "::set-output name=version::$(cat ReleaseTag | head -n1)"
+          echo "ReleaseTag=$(cat ReleaseTag | head -n1)"
+
       - name: cross compile nox-static
         env:
           CROSS_HOST: "${{ matrix.cross_host }}"
           OPENSSL_COMPILER: "${{ matrix.openssl_compiler }}"
           QT_DEVICE: "${{ matrix.qt_device }}"
           QT_XPLATFORM: "${{matrix.qt_xplatform}}"
-        run: |
-          chmod +x .github/workflows/cross_build.sh
-          .github/workflows/cross_build.sh
-
+          ReleaseTag: "${{ steps.set-version.outputs.version }}"
+        run: .github/workflows/cross_build.sh
 
       - uses: actions/upload-artifact@v2
         with:
           name: qbittorrent-nox_${{ matrix.cross_host }}_static
           path: |
             /tmp/qbittorrent-nox*
+
       - name: Upload Github Assets
         if: startsWith(github.ref, 'refs/tags/')
         uses: svenstaro/upload-release-action@v2
