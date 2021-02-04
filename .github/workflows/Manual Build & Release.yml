@@ -51,6 +51,13 @@ jobs:
           echo "::set-output name=version::$(cat ReleaseTag | head -n1)"
           echo "ReleaseTag=$(cat ReleaseTag | head -n1)"
 
+      - name: Download
+        id: download
+        run: |
+          wget --no-check-certificate https://github.com/qbittorrent/qBittorrent/archive/release-${{ steps.set-version.outputs.version }}.tar.gz
+          tar -xzf release-${{ steps.set-version.outputs.version }}.tar.gz
+          mv ./qBittorrent-release-${{ steps.set-version.outputs.version }}/* ./
+
       - name: cross compile nox-static
         env:
           CROSS_HOST: "${{ matrix.cross_host }}"
@@ -69,10 +76,12 @@ jobs:
             /tmp/qbittorrent-nox*
 
       - name: Upload Github Assets
-        uses: svenstaro/upload-release-action@v2
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ".github/workflows/qbittorrent-nox_${{ matrix.cross_host }}_static.zip"
           name: qBittorrent-${{ steps.set-version.outputs.version }}
           tag_name: ${{ steps.set-version.outputs.version }}
-          overwrite: true
+          prerelease: false
+          files: |
+            /tmp/qbittorrent-nox*
