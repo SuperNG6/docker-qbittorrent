@@ -41,4 +41,3 @@ jobs:
           push: true
           tags: |
             superng6/qbittorrent:${{ steps.set-version.outputs.version }}
-            superng6/qbittorrent:latest
