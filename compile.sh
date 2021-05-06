@@ -4,11 +4,12 @@
 QBV=$(cat ReleaseTag | head -n1)
 LIBTV=$(cat ReleaseTag | head -n 2 | tail -n 1 )
 # compile libtorrent
+export LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
 git clone https://github.com/arvidn/libtorrent.git
 cd libtorrent
 git checkout libtorrent-${LIBTV}
 ./autotool.sh
-./configure --disable-debug --enable-encryption --with-boost-libdir=/lib/x86_64-linux-gnu
+./configure --disable-debug --enable-encryption
 make clean && make -j$(nproc)
 make install-strip
 
