@@ -9,7 +9,7 @@ cd libtorrent
 git checkout libtorrent-${LIBTV}
 ./autotool.sh
 ./configure --disable-debug --enable-encryption
-make install
+make install-strip
 
 # compile qbittorrent
 cd ..
