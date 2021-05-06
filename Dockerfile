@@ -1,4 +1,4 @@
-FROM lsiobase/ubuntu:focal
+FROM lsiobase/ubuntu:focal as builder
 LABEL maintainer="SuperNG6"
 
 ARG DEBIAN_FRONTEND=noninteractive
