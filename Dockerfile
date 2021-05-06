@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxserver/baseimage-ubuntu:focal
+FROM lsiobase/ubuntu:focal
 LABEL maintainer="SuperNG6"
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -18,7 +18,7 @@ RUN set -ex \
     && chmod +x compile.sh && bash compile.sh
 
 # docker qBittorrent
-FROM ghcr.io/linuxserver/baseimage-ubuntu:focal
+FROM lsiobase/ubuntu:focal
 
 # environment settings
 ENV TZ=Asia/Shanghai \
