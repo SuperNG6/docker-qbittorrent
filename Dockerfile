@@ -21,6 +21,7 @@ RUN set -ex \
 FROM lsiobase/ubuntu:focal
 
 # environment settings
+ENV LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
 ENV TZ=Asia/Shanghai \
     WEBUI_PORT=8080 \
     PUID=1026 PGID=100 \
