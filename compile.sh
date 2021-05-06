@@ -9,20 +9,19 @@ cd libtorrent
 git checkout libtorrent-${LIBTV}
 ./autotool.sh
 ./configure --disable-debug --enable-encryption
-make clean && make -j$(nproc)
-make install-strip
+make install
 
 # compile qbittorrent
-cd /qbittorrent
+cd ..
 git clone https://github.com/qbittorrent/qBittorrent
 cd qBittorrent
 git checkout release-${QBV}
-./configure --disable-gui --disable-debug
-make clean && make -j$(nproc)
+./configure CXXFLAGS="-std=c++14" --disable-gui --disable-debug
 make install
 
 # packing qbittorrent
+cd ..
 ldd /usr/local/bin/qbittorrent-nox | cut -d ">" -f 2 | grep lib | cut -d "(" -f 1 | xargs tar -chvf /qbittorrent/qbittorrent.tar
-mkdir /qbittorrent/qbittorrent
-tar -xvf /qbittorrent/qbittorrent.tar -C /qbittorrent/qbittorrent
-cp --parents /usr/local/bin/qbittorrent-nox /qbittorrent/qbittorrent
+mkdir qbittorrent
+tar -xvf /qbittorrent/qbittorrent.tar -C qbittorrent
+cp --parents /usr/local/bin/qbittorrent-nox qbittorrent

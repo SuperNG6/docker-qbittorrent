@@ -5,14 +5,14 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /qbittorrent
 
-COPY compile.sh /qbittorrent/
-COPY ReleaseTag /qbittorrent/
-
 RUN set -ex \
     && apt -y update \
     && apt -y install build-essential pkg-config automake libtool git zlib1g-dev libssl-dev libgeoip-dev \
     && apt -y install libboost-dev libboost-system-dev libboost-chrono-dev libboost-random-dev \
     && apt -y install qtbase5-dev qttools5-dev libqt5svg5-dev
+
+COPY ReleaseTag /qbittorrent/
+COPY compile.sh /qbittorrent/
 
 RUN set -ex \
     && chmod +x compile.sh && bash compile.sh
@@ -31,7 +31,7 @@ COPY root /
 COPY --from=builder  /qbittorrent/qbittorrent/  /
 
 # install python3
-RUN apt -y update && apt -y install python3 \
+RUN apt -y update && DEBIAN_FRONTEND=noninteractive apt -y install python3 \
     && chmod a+x /usr/local/bin/qbittorrent-nox \
     && echo "**** cleanup ****" \
     && apt-get clean \
