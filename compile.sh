@@ -28,7 +28,7 @@ make clean && make -j$(nproc)
 make install-strip
 
 # compile qbittorrent
-cd ..
+cd /qbittorrent
 git clone https://github.com/qbittorrent/qBittorrent
 cd qBittorrent
 git checkout release-${QBV}
@@ -37,8 +37,7 @@ make clean && make -j$(nproc)
 make install
 
 # packing qbittorrent
-cd ..
 ldd /usr/local/bin/qbittorrent-nox | cut -d ">" -f 2 | grep lib | cut -d "(" -f 1 | xargs tar -chvf /qbittorrent/qbittorrent.tar
-mkdir qbittorrent
-tar -xvf /qbittorrent/qbittorrent.tar -C qbittorrent
-cp --parents /usr/local/bin/qbittorrent-nox qbittorrent
+mkdir -p /qbittorrent/qbittorrent
+tar -xvf /qbittorrent/qbittorrent.tar -C /qbittorrent/qbittorrent
+cp --parents /usr/local/bin/qbittorrent-nox /qbittorrent/qbittorrent
