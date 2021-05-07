@@ -21,7 +21,7 @@ RUN set -ex \
 FROM lsiobase/ubuntu:focal
 
 # environment settings
-ENV LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
+ARG LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
 ENV TZ=Asia/Shanghai \
     WEBUI_PORT=8080 \
     PUID=1026 PGID=100 \
@@ -29,8 +29,7 @@ ENV TZ=Asia/Shanghai \
 
 # add local files and install qbitorrent
 COPY root /
-COPY --from=builder  /qbittorrent/qbittorrent/  /
-
+COPY --from=builder /qbittorrent/qbittorrent /
 # install python3
 RUN apt -y update && DEBIAN_FRONTEND=noninteractive apt -y install python3 \
     && chmod a+x /usr/local/bin/qbittorrent-nox \
