@@ -1,14 +1,12 @@
 FROM lsiobase/ubuntu:focal as builder
 LABEL maintainer="SuperNG6"
 
-ARG DEBIAN_FRONTEND=noninteractive
-
 WORKDIR /qbittorrent
 
 RUN set -ex \
-    && apt -y update \
+    && apt -y -qq update \
     && DEBIAN_FRONTEND=noninteractive \
-    && apt -y install build-essential pkg-config automake libtool git zlib1g-dev libssl-dev libgeoip-dev \
+    && apt -y -qq install build-essential pkg-config automake libtool git zlib1g-dev libssl-dev libgeoip-dev \
     libboost-dev libboost-system-dev libboost-chrono-dev libboost-random-dev \
     qtbase5-dev qttools5-dev libqt5svg5-dev
 
@@ -23,7 +21,7 @@ FROM lsiobase/ubuntu:focal
 
 # add local files and install qbitorrent
 COPY root /
-COPY --from=builder /qbittorrent/qbittorrent /
+COPY --from=builder /qbittorrent-package /
 
 # environment settings
 ARG LD_LIBRARY_PATH=/usr/local/lib
@@ -33,7 +31,7 @@ ENV TZ=Asia/Shanghai \
     UT=true
 
 # install python3
-RUN apt -y update && DEBIAN_FRONTEND=noninteractive apt -y install python3 \
+RUN apt -y -qq update && apt -y -qq install python3 \
     && chmod a+x /usr/local/bin/qbittorrent-nox \
     && echo "**** cleanup ****" \
     && apt-get clean \
