@@ -6,7 +6,7 @@ echo -e "${INFO} Check CPU architecture ..."
 if [[ ${ARCH} == "x86_64" ]]; then
     ARCH="--with-boost-libdir=/usr/lib/x86_64-linux-gnu"
 elif [[ ${ARCH} == "aarch64" ]]; then
-    ARCH="--with-boost-libdir=/usr/lib/arm-linux-gnueabihf"
+    ARCH="--with-boost-libdir=/usr/lib/aarch64-linux-gnu"
 elif [[ ${ARCH} == "armv7l" ]]; then
     ARCH="--with-boost-libdir=/usr/lib/arm-linux-gnueabihf"
 else
