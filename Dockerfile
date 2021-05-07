@@ -20,6 +20,10 @@ RUN set -ex \
 # docker qBittorrent
 FROM lsiobase/ubuntu:focal
 
+# add local files and install qbitorrent
+COPY root /
+COPY --from=builder /qbittorrent/qbittorrent /
+
 # environment settings
 ARG LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}
 ENV TZ=Asia/Shanghai \
@@ -27,9 +31,6 @@ ENV TZ=Asia/Shanghai \
     PUID=1026 PGID=100 \
     UT=true
 
-# add local files and install qbitorrent
-COPY root /
-COPY --from=builder /qbittorrent/qbittorrent /
 # install python3
 RUN apt -y update && DEBIAN_FRONTEND=noninteractive apt -y install python3 \
     && chmod a+x /usr/local/bin/qbittorrent-nox \
