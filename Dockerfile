@@ -1,8 +1,6 @@
 FROM lsiobase/ubuntu:focal as builder
 LABEL maintainer="SuperNG6"
 
-WORKDIR /qbittorrent
-
 RUN set -ex \
     && apt -y -qq update \
     && DEBIAN_FRONTEND=noninteractive \
@@ -10,6 +8,7 @@ RUN set -ex \
     libboost-dev libboost-system-dev libboost-chrono-dev libboost-random-dev \
     qtbase5-dev qttools5-dev libqt5svg5-dev
 
+RUN mkdir qbittorrent && cd qbittorrent
 COPY ReleaseTag /qbittorrent/
 COPY compile.sh /qbittorrent/
 
@@ -21,7 +20,7 @@ FROM lsiobase/ubuntu:focal
 
 # add local files and install qbitorrent
 COPY root /
-COPY --from=builder /qbittorrent-package /
+COPY --from=builder /qbittorrent/qbittorrent /
 
 # environment settings
 ARG LD_LIBRARY_PATH=/usr/local/lib

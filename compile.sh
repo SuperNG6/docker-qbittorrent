@@ -38,6 +38,6 @@ make install
 
 # packing qbittorrent
 ldd /usr/local/bin/qbittorrent-nox | cut -d ">" -f 2 | grep lib | cut -d "(" -f 1 | xargs tar -chvf /qbittorrent/qbittorrent.tar
-mkdir -p /qbittorrent-package
-tar -xvf /qbittorrent/qbittorrent.tar -C /qbittorrent-package
-cp --parents /usr/local/bin/qbittorrent-nox /qbittorrent-package
+mkdir -p /qbittorrent/qbittorrent
+tar -xvf /qbittorrent/qbittorrent.tar -C /qbittorrent/qbittorrent
+cp --parents /usr/local/bin/qbittorrent-nox /qbittorrent/qbittorrent
