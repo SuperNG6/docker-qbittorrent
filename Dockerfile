@@ -4,7 +4,7 @@ LABEL maintainer="SuperNG6"
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN set -ex \
-    && mkdir qbittorrent && cd qbittorrent \
+    && mkdir /qbittorrent && cd /qbittorrent \
     && apt -y update \
     && apt -y install build-essential pkg-config automake libtool git zlib1g-dev libssl-dev libgeoip-dev \
     && apt -y install libboost-dev libboost-system-dev libboost-chrono-dev libboost-random-dev \
