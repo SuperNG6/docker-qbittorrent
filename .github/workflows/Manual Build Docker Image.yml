@@ -30,7 +30,6 @@ jobs:
           echo "::set-output name=version::$(cat ReleaseTag | head -n1)"
           echo "ReleaseTag=$(cat ReleaseTag | head -n1)" 
           echo "::set-output name=status::success"
-
       # Build and push
       - name: Build and push
         if: steps.set-version.outputs.status == 'success'
