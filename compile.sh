@@ -37,7 +37,9 @@ make clean && make -j$(nproc)
 make install
 
 # packing qbittorrent
+cd /qbittorrent
 ldd /usr/local/bin/qbittorrent-nox | cut -d ">" -f 2 | grep lib | cut -d "(" -f 1 | xargs tar -chvf /qbittorrent/qbittorrent.tar
 mkdir -p /qbittorrent/qbittorrent
 tar -xvf /qbittorrent/qbittorrent.tar -C /qbittorrent/qbittorrent
 cp --parents /usr/local/bin/qbittorrent-nox /qbittorrent/qbittorrent
+tar czvf qbittorrent.tar.gz /qbittorrent/qbittorrent
