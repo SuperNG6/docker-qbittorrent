@@ -50,16 +50,7 @@ jobs:
           echo "::set-output name=version::$(cat ReleaseTag | head -n1)"
           echo "ReleaseTag=$(cat ReleaseTag | head -n1)"
 
-      - name: cross compile nox-static
-        env:
-          CROSS_HOST: "${{ matrix.cross_host }}"
-          OPENSSL_COMPILER: "${{ matrix.openssl_compiler }}"
-          QT_DEVICE: "${{ matrix.qt_device }}"
-          QT_XPLATFORM: "${{matrix.qt_xplatform}}"
-          ReleaseTag: "${{ steps.set-version.outputs.version }}"
-        run: |
-          chmod a+x .github/workflows/cross_build.sh
-          .github/workflows/cross_build.sh
+
 
       - uses: actions/upload-artifact@v2
         with:
