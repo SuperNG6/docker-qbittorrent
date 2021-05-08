@@ -22,7 +22,7 @@ FROM lsiobase/ubuntu:focal
 
 # add local files and install qbitorrent
 COPY root /
-COPY --from=builder /qbittorrent/qbittorrent /
+COPY --from=builder /qbittorrent/qbittorrent.tar.gz /tmp
 
 # environment settings
 ARG LD_LIBRARY_PATH=/usr/local/lib
@@ -33,6 +33,7 @@ ENV TZ=Asia/Shanghai \
 
 # install python3
 RUN apt -y -qq update && apt -y -qq install python3 \
+    && tar xvf /tmp/qbittorrent.tar.gz -C / \
     && chmod a+x /usr/local/bin/qbittorrent-nox \
     && echo "**** cleanup ****" \
     && apt-get clean \
