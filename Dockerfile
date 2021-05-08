@@ -2,18 +2,19 @@ FROM lsiobase/ubuntu:focal as builder
 LABEL maintainer="SuperNG6"
 
 ARG DEBIAN_FRONTEND=noninteractive
-WORKDIR /qbittorrent
 
 RUN set -ex \
-    && apt -y update \
-    && apt -y install build-essential pkg-config automake libtool git zlib1g-dev libssl-dev libgeoip-dev \
-    && apt -y install libboost-dev libboost-system-dev libboost-chrono-dev libboost-random-dev \
-    && apt -y install qtbase5-dev qttools5-dev libqt5svg5-dev
+    && mkdir /qbittorrent \
+    && apt -y -qq update \
+    && apt -y -qq install build-essential pkg-config automake libtool git zlib1g-dev libssl-dev libgeoip-dev \
+    && apt -y -qq install libboost-dev libboost-system-dev libboost-chrono-dev libboost-random-dev \
+    && apt -y -qq install qtbase5-dev qttools5-dev libqt5svg5-dev
 
-COPY ReleaseTag /qbittorrent/
-COPY compile.sh /qbittorrent/
+COPY ReleaseTag /qbittorrent
+COPY compile.sh /qbittorrent
 
 RUN set -ex \
+    && cd /qbittorrent \
     && chmod +x compile.sh && bash compile.sh
 
 # docker qBittorrent
@@ -21,7 +22,7 @@ FROM lsiobase/ubuntu:focal
 
 # add local files and install qbitorrent
 COPY root /
-COPY --from=builder /qbittorrent/qbittorrent.tar.gz /tmp
+COPY --from=builder /qbittorrent/qbittorrent /
 
 # environment settings
 ARG LD_LIBRARY_PATH=/usr/local/lib
@@ -31,9 +32,7 @@ ENV TZ=Asia/Shanghai \
     UT=true
 
 # install python3
-RUN apt -y update && apt -y install python3 \
-    && tar zxvf /tmp/qbitorrent.tar.gz -C / \
-    && rm -rf /tmp/qbitorrent.tar.gz \
+RUN apt -y -qq update && apt -y -qq install python3 \
     && chmod a+x /usr/local/bin/qbittorrent-nox \
     && echo "**** cleanup ****" \
     && apt-get clean \
