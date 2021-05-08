@@ -34,6 +34,7 @@ ENV TZ=Asia/Shanghai \
 # install python3
 RUN apt -y -qq update && apt -y -qq install python3 \
     && tar xvf /tmp/qbittorrent.tar.gz -C / \
+    && rm -rf /tmp/qbittorrent.tar.gz \
     && chmod a+x /usr/local/bin/qbittorrent-nox \
     && echo "**** cleanup ****" \
     && apt-get clean \
