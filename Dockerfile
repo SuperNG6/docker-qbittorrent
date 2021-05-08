@@ -1,14 +1,15 @@
 FROM lsiobase/ubuntu:focal as builder
 LABEL maintainer="SuperNG6"
 
-RUN set -ex \
-    && apt -y -qq update \
-    && DEBIAN_FRONTEND=noninteractive \
-    && apt -y -qq install build-essential pkg-config automake libtool git zlib1g-dev libssl-dev libgeoip-dev \
-    libboost-dev libboost-system-dev libboost-chrono-dev libboost-random-dev \
-    qtbase5-dev qttools5-dev libqt5svg5-dev
+ARG DEBIAN_FRONTEND=noninteractive
 
-RUN mkdir qbittorrent && cd qbittorrent
+RUN set -ex \
+    && mkdir qbittorrent && cd qbittorrent \
+    && apt -y update \
+    && apt -y install build-essential pkg-config automake libtool git zlib1g-dev libssl-dev libgeoip-dev \
+    && apt -y install libboost-dev libboost-system-dev libboost-chrono-dev libboost-random-dev \
+    && apt -y install qtbase5-dev qttools5-dev libqt5svg5-dev
+
 COPY ReleaseTag /qbittorrent/
 COPY compile.sh /qbittorrent/
 
