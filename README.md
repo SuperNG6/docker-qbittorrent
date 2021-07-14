@@ -27,6 +27,14 @@ GitHub：https://github.com/SuperNG6/Docker-qBittorrent
 
 
 # Changelogs
+## 2021/07/14
+
+      1、更新qBittorrent 4.3.5，4.3.6
+      2、对于 外网401"unauthorized"这种情况进行讲解
+      更新qBittorrent设置里修改端口，内外网用一样的端口
+      webui设置里禁用Host header 属性验证 也可解决这个问题，新版已默认勾选这个选项，不过最好还是检查一下是否勾选上了
+
+
 ## 2021/02/04
 
       1、更新qBittorrent 4.3.3
