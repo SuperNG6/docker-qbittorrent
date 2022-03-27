@@ -25,8 +25,12 @@ GitHub：https://github.com/SuperNG6/Docker-qBittorrent
 | arm32        | latest |
 
 
-
 # Changelogs
+## 2022/03/27
+
+      1、更换自编译静态版本qBittorrent为`userdocs/qbittorrent-nox-static`编译版本
+      2、更新qbittorrent v4.4.2 libtorrent v2.0.5
+
 ## 2021/07/14
 
       1、更新qBittorrent 4.3.5，4.3.6

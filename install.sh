@@ -5,11 +5,11 @@ ARCH=$(uname -m)
 
 echo -e "${INFO} Check CPU architecture ..."
 if [[ ${ARCH} == "x86_64" ]]; then
-    ARCH="qbittorrent-nox_x86_64-linux-musl_static"
+    ARCH="x86_64-qbittorrent-nox"
 elif [[ ${ARCH} == "aarch64" ]]; then
-    ARCH="qbittorrent-nox_aarch64-linux-musl_static"
+    ARCH="aarch64-qbittorrent-nox"
 elif [[ ${ARCH} == "armv7l" ]]; then
-    ARCH="qbittorrent-nox_arm-linux-musleabi_static"
+    ARCH="armv7-qbittorrent-nox"
 else
     echo -e "${ERROR} This architecture is not supported."
     exit 1
@@ -19,8 +19,6 @@ fi
 echo "Downloading binary file: ${ARCH}"
 TAG=$(cat /qbittorrent/ReleaseTag)
 echo "qbittorrent version: ${TAG}"
-wget -O ${PWD}/qbittorrent.zip https://github.com/SuperNG6/docker-qbittorrent/releases/download/${TAG}/${ARCH}.zip
+wget -O ${PWD}/qbittorrent-nox https://github.com/userdocs/qbittorrent-nox-static/releases/download/release-${TAG}/${ARCH}
 
 echo "Download binary file: ${ARCH} completed"
-
-unzip qbittorrent.zip
