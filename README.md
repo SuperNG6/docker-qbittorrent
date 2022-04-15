@@ -26,6 +26,11 @@ GitHub：https://github.com/SuperNG6/Docker-qBittorrent
 
 
 # Changelogs
+## 2022/04/15
+
+      1、支持修改trackerlist，`-e TL=`
+
+
 ## 2022/03/27
 
       1、更换自编译静态版本qBittorrent为`userdocs/qbittorrent-nox-static`编译版本

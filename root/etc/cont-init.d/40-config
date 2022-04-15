@@ -1,31 +1,28 @@
 #!/usr/bin/with-contenv bash
 
-if [ "$UT" == "true" ];then
+if [ "$UT" == "true" ]; then
+    wget -O /tmp/trackers_list.txt $TL
+    Newtrackers="Bittorrent\TrackersList=$(awk '{if(!NF){next}}1' /tmp/trackers_list.txt | sed ':a;N;s/\n/\\n/g;ta')"
+    Oldtrackers="$(grep TrackersList= /config/qBittorrent/config/qBittorrent.conf)"
+    echo $Newtrackers >/tmp/Newtrackers.txt
 
-wget -O /tmp/trackers_all.txt https://githubraw.sleele.workers.dev/XIU2/TrackersListCollection/master/all.txt
-Newtrackers="Bittorrent\TrackersList=$(awk '{if(!NF){next}}1'  /tmp/trackers_all.txt|sed ':a;N;s/\n/\\n/g;ta' )"
-Oldtrackers="`grep  TrackersList=  /config/qBittorrent/config/qBittorrent.conf`" 
-echo $Newtrackers >/tmp/Newtrackers.txt
+    if [ -e "/tmp/trackers_list.txt" ]; then
 
-if [  -e "/tmp/trackers_all.txt" ] ;  then 
+        if [ "$Newtrackers" == "$Oldtrackers" ]; then
+            echo trackers文件一样,不需要更新。
+        else
+            sed -i '/Bittorrent\\TrackersList=/r /tmp/Newtrackers.txt' /config/qBittorrent/config/qBittorrent.conf
+            sed -i '1,/^Bittorrent\\TrackersList=.*/{//d;}' /config/qBittorrent/config/qBittorrent.conf
+            echo 已更新trackers。
+        fi
 
-if [ "$Newtrackers" == "$Oldtrackers" ];then
-echo trackers文件一样,不需要更新。
-else
-sed  -i   '/Bittorrent\\TrackersList=/r /tmp/Newtrackers.txt'    /config/qBittorrent/config/qBittorrent.conf
-sed  -i   '1,/^Bittorrent\\TrackersList=.*/{//d;}'  /config/qBittorrent/config/qBittorrent.conf
-echo 已更新trackers。
-fi
+        rm /tmp/trackers_list.txt
+        rm /tmp/Newtrackers.txt
 
-rm  /tmp/trackers_all.txt
-rm  /tmp/Newtrackers.txt
-
-else
-echo 更新文件未正确下载，更新未成功，请检查网络。
-
-fi
+    else
+        echo 更新文件未正确下载，更新未成功，请检查网络。
+    fi
 
 else
-
-echo 未设定自动更新trackers。
+    echo 未设定自动更新trackers。
 fi

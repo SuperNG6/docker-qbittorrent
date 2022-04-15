@@ -3,8 +3,8 @@ name: Update ReleaseTag
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 19 * * *'
-    
+    - cron: "0 19 * * *"
+
 jobs:
   update:
     runs-on: ubuntu-latest
