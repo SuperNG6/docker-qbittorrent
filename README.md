@@ -108,7 +108,7 @@ __执行命令__
 ````
 docker create  \
     --name=qbittorrent  \
-    -e WEBUIPORT=8080  \
+    -e WEBUI_PORT=8080  \
     -e PUID=1026 \
     -e PGID=100 \
     -e TZ=Asia/Shanghai \
