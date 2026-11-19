@@ -1,0 +1,108 @@
+name: Build Docker Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: Build and push even if the version tag already exists
+        type: boolean
+        default: false
+  schedule:
+    - cron: "30 21 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-qbittorrent-image
+  cancel-in-progress: false
+
+env:
+  DOCKER_IMAGE: superng6/qbittorrent
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+      should_build: ${{ steps.check.outputs.should_build }}
+    steps:
+      - name: Check upstream release and Docker Hub tag
+        id: check
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FORCE_BUILD: ${{ github.event_name == 'workflow_dispatch' && inputs.force_build }}
+        run: |
+          set -euo pipefail
+
+          release=$(gh release view --repo userdocs/qbittorrent-nox-static --json tagName --jq .tagName)
+          if [[ ! "$release" =~ ^release-([0-9][A-Za-z0-9_.-]{0,127})$ ]]; then
+            echo "::error::Upstream release tag must start with release- and contain a valid Docker image version"
+            exit 1
+          fi
+          version=${BASH_REMATCH[1]}
+
+          if [[ "$FORCE_BUILD" == "true" ]]; then
+            should_build=true
+            decision="Manual force_build requested"
+          else
+            tag_url="https://hub.docker.com/v2/repositories/${DOCKER_IMAGE}/tags/${version}"
+            status=$(curl --silent --show-error --max-time 30 --output /dev/null --write-out '%{http_code}' "$tag_url")
+            case "$status" in
+              200)
+                should_build=false
+                decision="Docker Hub already has ${DOCKER_IMAGE}:${version}"
+                ;;
+              404)
+                should_build=true
+                decision="Docker Hub does not have ${DOCKER_IMAGE}:${version}"
+                ;;
+              *)
+                echo "::error::Docker Hub tag check failed with HTTP ${status}"
+                exit 1
+                ;;
+            esac
+          fi
+
+          {
+            echo "version=${version}"
+            echo "should_build=${should_build}"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## qBittorrent image check"
+            echo
+            echo "- Version: ${version}"
+            echo "- Build needed: ${should_build}"
+            echo "- ${decision}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  build:
+    runs-on: ubuntu-latest
+    needs: check-version
+    if: needs.check-version.outputs.should_build == 'true'
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm/v7,linux/arm64
+          push: true
+          build-args: |
+            QBITTORRENT_VERSION=${{ needs.check-version.outputs.version }}
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:${{ needs.check-version.outputs.version }}
+            ${{ env.DOCKER_IMAGE }}:latest

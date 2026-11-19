@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # Check CPU architecture
 ARCH=$(uname -m)
 
@@ -16,9 +18,12 @@ else
 fi
 
 # Download files
-echo "Downloading binary file: ${ARCH}"
-TAG=$(cat /qbittorrent/ReleaseTag)
-echo "qbittorrent version: ${TAG}"
-wget -O ${PWD}/qbittorrent-nox https://github.com/userdocs/qbittorrent-nox-static/releases/download/release-${TAG}/${ARCH}
+TAG=${QBITTORRENT_VERSION:-$(cat /qbittorrent/ReleaseTag)}
+BINARY="$PWD/qbittorrent-nox"
+URL="https://github.com/userdocs/qbittorrent-nox-static/releases/download/release-${TAG}/${ARCH}"
 
-echo "Download binary file: ${ARCH} completed"
+echo "Downloading ${ARCH} for qBittorrent ${TAG}"
+if ! wget -O "$BINARY" "$URL" || [[ ! -s "$BINARY" ]]; then
+    echo "Failed to download a non-empty qBittorrent ${TAG} binary for ${ARCH}" >&2
+    exit 1
+fi
