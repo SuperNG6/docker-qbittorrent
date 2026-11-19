@@ -12,35 +12,39 @@ jobs:
       - name: Checkout codebase
         uses: actions/checkout@v4
 
-      # 获取latest release tag，cut切割无关内容。和仓库中LocalReleaseTag对比，之后输出tag给之后的步骤
       - name: Set Version
         id: set-version
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          TAG=$(wget --no-check-certificate -qO- https://api.github.com/repos/userdocs/qbittorrent-nox-static/tags | grep 'name' | cut -d\" -f4 | head -1 | cut -c 9- )
-
-          OnlineReleaseTag=${TAG}
-          LocalReleaseTag=$(cat ReleaseTag | head -n1)
-
-          echo "LocalReleaseTag=$(cat ReleaseTag | head -n1)"
-          echo "OnlineReleaseTag=${TAG}"
-
-          if [ "${LocalReleaseTag}" != "${OnlineReleaseTag}" ]
-          then
-             echo "::set-output name=version::${TAG}"
-             echo "::set-output name=status::success"
+          RELEASE=$(gh release view --repo userdocs/qbittorrent-nox-static --json tagName --jq .tagName)
+          if [[ ! "$RELEASE" =~ ^release-([0-9][A-Za-z0-9_.-]{0,127})$ ]]; then
+            echo "::error::Upstream release tag must start with release- and contain a valid Docker image version"
+            exit 1
           fi
 
-      # 将latest release tag写入到./ReleaseTag
-      - name: Update ReleaseTag
-        if: steps.set-version.outputs.status == 'success'
-        run: |
-          echo ${{ steps.set-version.outputs.version }} > ./ReleaseTag
+          VERSION=${BASH_REMATCH[1]}
+          LOCAL_VERSION=$(head -n 1 ReleaseTag)
+          echo "LocalReleaseTag=${LOCAL_VERSION}"
+          echo "OnlineReleaseTag=${VERSION}"
 
-      # push到GitHub的项目当中
+          if [[ "$LOCAL_VERSION" != "$VERSION" ]]; then
+            echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update ReleaseTag
+        if: steps.set-version.outputs.version != ''
+        env:
+          VERSION: ${{ steps.set-version.outputs.version }}
+        run: printf '%s\n' "$VERSION" > ReleaseTag
+
       - name: Push
-        if: steps.set-version.outputs.status == 'success'
+        if: steps.set-version.outputs.version != ''
+        env:
+          VERSION: ${{ steps.set-version.outputs.version }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git commit -am "Update ReleaseTag ${{ steps.set-version.outputs.version }}"
+          git add ReleaseTag
+          git commit -m "Update ReleaseTag ${VERSION}"
           git push -v --progress
