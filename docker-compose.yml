@@ -1,7 +1,7 @@
 version: "2"
 services:
   aria2:
-    image: superng6/qbittorrent
+    image: superng6/qbittorrent:latest-s6v3
     container_name: qbittorrent
     environment:
       - PUID=1026

@@ -1,4 +1,4 @@
-name: Build Docker Image
+name: Build qBittorrent s6 v3 Image
 
 on:
   workflow_dispatch:
@@ -7,21 +7,22 @@ on:
         description: Build and push even if the version tag already exists
         type: boolean
         default: false
-  schedule:
-    - cron: "30 21 * * *"
 
 permissions:
   contents: read
 
 concurrency:
-  group: publish-qbittorrent-image
+  group: publish-qbittorrent-s6v3
   cancel-in-progress: false
 
 env:
   DOCKER_IMAGE: superng6/qbittorrent
+  TAG_SUFFIX: -s6v3
+  PLATFORMS: linux/amd64,linux/arm/v7,linux/arm64
 
 jobs:
   check-version:
+    if: github.ref == 'refs/heads/s6v3'
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.check.outputs.version }}
@@ -47,16 +48,16 @@ jobs:
             should_build=true
             decision="Manual force_build requested"
           else
-            tag_url="https://hub.docker.com/v2/repositories/${DOCKER_IMAGE}/tags/${version}"
+            tag_url="https://hub.docker.com/v2/repositories/${DOCKER_IMAGE}/tags/${version}${TAG_SUFFIX}"
             status=$(curl --silent --show-error --max-time 30 --output /dev/null --write-out '%{http_code}' "$tag_url")
             case "$status" in
               200)
                 should_build=false
-                decision="Docker Hub already has ${DOCKER_IMAGE}:${version}"
+                decision="Docker Hub already has ${DOCKER_IMAGE}:${version}${TAG_SUFFIX}"
                 ;;
               404)
                 should_build=true
-                decision="Docker Hub does not have ${DOCKER_IMAGE}:${version}"
+                decision="Docker Hub does not have ${DOCKER_IMAGE}:${version}${TAG_SUFFIX}"
                 ;;
               *)
                 echo "::error::Docker Hub tag check failed with HTTP ${status}"
@@ -83,11 +84,25 @@ jobs:
     needs: check-version
     if: needs.check-version.outputs.should_build == 'true'
     steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
+
+      - name: Test WebUI and s6 on all release platforms
+        env:
+          VERSION: ${{ needs.check-version.outputs.version }}
+        run: |
+          IFS=, read -ra platforms <<< "$PLATFORMS"
+          for platform in "${platforms[@]}"; do
+            docker buildx build --load --platform "$platform" \
+              --build-arg "QBITTORRENT_VERSION=$VERSION" --tag local/qbittorrent:s6v3-test .
+            bash tests/smoke-s6v3.sh local/qbittorrent:s6v3-test "$platform" qbittorrent
+          done
 
       - name: Login to Docker Hub
         uses: docker/login-action@v4
@@ -98,11 +113,12 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
+          context: .
           file: ./Dockerfile
-          platforms: linux/amd64,linux/arm/v7,linux/arm64
+          platforms: ${{ env.PLATFORMS }}
           push: true
           build-args: |
             QBITTORRENT_VERSION=${{ needs.check-version.outputs.version }}
           tags: |
-            ${{ env.DOCKER_IMAGE }}:${{ needs.check-version.outputs.version }}
-            ${{ env.DOCKER_IMAGE }}:latest
+            ${{ env.DOCKER_IMAGE }}:${{ needs.check-version.outputs.version }}${{ env.TAG_SUFFIX }}
+            ${{ env.DOCKER_IMAGE }}:latest${{ env.TAG_SUFFIX }}

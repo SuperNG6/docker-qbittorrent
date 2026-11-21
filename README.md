@@ -118,14 +118,14 @@ docker create  \
     -v /配置文件位置:/config  \
     -v /下载位置:/downloads  \
     --restart unless-stopped  \
-    superng6/qbittorrent:latest
+    superng6/qbittorrent:latest-s6v3
 ````
 docker-compose  
 ````
 version: "2"
 services:
   qbittorrent:
-    image: superng6/qbittorrent
+    image: superng6/qbittorrent:latest-s6v3
     container_name: qbittorrent
     environment:
       - PUID=1026
