@@ -28,6 +28,7 @@ COPY --from=builder  /qbittorrent/qbittorrent-nox   /usr/local/bin/qbittorrent-n
 
 # install python3
 RUN  apk add --no-cache python3 \
+&&   python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 13) else sys.version)' \
 &&   rm -rf /var/cache/apk/*   \
 &&   chmod a+x /usr/local/bin/qbittorrent-nox \
 &&   /usr/local/bin/qbittorrent-nox --version

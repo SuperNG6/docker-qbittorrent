@@ -93,7 +93,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
-      - name: Test WebUI and s6 on all release platforms
+      - name: Test WebUI search and s6 on all release platforms
         env:
           VERSION: ${{ needs.check-version.outputs.version }}
         run: |
@@ -102,6 +102,7 @@ jobs:
             docker buildx build --load --platform "$platform" \
               --build-arg "QBITTORRENT_VERSION=$VERSION" --tag local/qbittorrent:s6v3-test .
             bash tests/smoke-s6v3.sh local/qbittorrent:s6v3-test "$platform" qbittorrent
+            bash tests/smoke-search.sh local/qbittorrent:s6v3-test "$platform"
           done
 
       - name: Login to Docker Hub
