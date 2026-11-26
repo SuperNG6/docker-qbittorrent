@@ -1,4 +1,4 @@
-FROM superng6/alpine:3.21 AS builder
+FROM superng6/alpine:3.24 AS builder
 LABEL maintainer="SuperNG6"
 
 WORKDIR /qbittorrent
@@ -13,7 +13,7 @@ RUN set -ex \
 	&& /qbittorrent/install.sh
 
 # docker qBittorrent
-FROM superng6/alpine:3.21
+FROM superng6/alpine:3.24
 
 # environment settings
 ENV TZ=Asia/Shanghai \
@@ -28,6 +28,7 @@ COPY --from=builder  /qbittorrent/qbittorrent-nox   /usr/local/bin/qbittorrent-n
 
 # install python3
 RUN  apk add --no-cache python3 \
+&&   python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 13) else sys.version)' \
 &&   rm -rf /var/cache/apk/*   \
 &&   chmod a+x /usr/local/bin/qbittorrent-nox \
 &&   /usr/local/bin/qbittorrent-nox --version

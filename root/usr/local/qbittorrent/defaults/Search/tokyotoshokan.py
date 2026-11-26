@@ -1,4 +1,4 @@
-#VERSION: 2.3
+#VERSION: 2.4
 #Author: Douman (douman@gmx.se)
 #        Bruno Barbieri (brunorex@gmail.com)
 
@@ -16,19 +16,12 @@ from novaprinter import prettyPrinter
 from helpers import download_file, retrieve_url
 
 class tokyotoshokan(object):
+    name = 'Tokyo Toshokan'
     url = 'http://tokyotosho.info'
+    supported_categories = {'all': '0', 'anime': '1', 'games': '14'}
 
     global page_count
     page_count = 1
-
-    def __init__(self):
-        self.name = 'Tokyo Toshokan'
-        self.supported_categories = {'all': '0', 'anime': '1', 'games': '14' }
-        #self.supported_categories = {'all': '0', 'anime': '1', 'anime(non-english)': '10',
-        #                        'manga': '3', 'drama': '8', 'music': '2',
-        #                        'music video': '9', 'raw': '7', 'hentai': '4',
-        #                        'eroge': '14', 'batch': '11', 'jav': '15', 'other': '5'}
-        #
 
     def download_torrent(self, info):
         print(download_file(info))

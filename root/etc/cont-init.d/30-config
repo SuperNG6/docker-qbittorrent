@@ -6,8 +6,27 @@ if [ ! -e "/config/qBittorrent/config/qBittorrent.conf" ]; then
     cp /usr/local/qbittorrent/defaults/qBittorrent.conf /config/qBittorrent/config/qBittorrent.conf
 fi
 
-# 检查Search文件，并创建.
-if [ ! -d "/config/qBittorrent/data/nova3/engines" ]; then
-    mkdir -p /config/qBittorrent/data/nova3/engines
+# 初始化搜索插件，保留用户维护的 Tokyo Toshokan 副本。
+search_defaults=/usr/local/qbittorrent/defaults/Search
+engines=/config/qBittorrent/data/nova3/engines
+tokyo=tokyotoshokan.py
+mkdir -p "$engines" || exit 1
+for plugin in "$search_defaults"/*.py; do
+    if [[ ${plugin##*/} == "$tokyo" && ( -e "$engines/$tokyo" || -L "$engines/$tokyo" ) ]]; then
+        continue
+    fi
+    cp -u "$plugin" "$engines/" || exit 1
+done
+
+# 旧版镜像内置的插件缺少类属性，会导致 Nova 无法枚举所有插件。
+# 用旧文件的校验和识别内置副本，避免时间戳影响升级或覆盖用户修改。
+legacy_tokyo=e0cac329d5787d9a83a5bb7365af64fa939152dd5b9104daeaa1a37713c0dbe5
+if [[ -f "$engines/$tokyo" && ! -L "$engines/$tokyo" ]] &&
+    checksum=$(sha256sum "$engines/$tokyo") && [[ ${checksum%% *} == "$legacy_tokyo" ]]; then
+    replacement=$(mktemp "$engines/.tokyotoshokan.XXXXXX") || exit 1
+    if ! install -m 0644 "$search_defaults/$tokyo" "$replacement" ||
+        ! mv -f "$replacement" "$engines/$tokyo"; then
+        rm -f "$replacement"
+        exit 1
+    fi
 fi
-cp -ru /usr/local/qbittorrent/defaults/Search/* /config/qBittorrent/data/nova3/engines

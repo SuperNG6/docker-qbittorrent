@@ -19,6 +19,7 @@ concurrency:
 
 env:
   DOCKER_IMAGE: superng6/qbittorrent
+  PLATFORMS: linux/amd64,linux/arm/v7,linux/arm64
 
 jobs:
   check-version:
@@ -83,11 +84,27 @@ jobs:
     needs: check-version
     if: needs.check-version.outputs.should_build == 'true'
     steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
+
+      - name: Test search on all release platforms
+        shell: bash
+        env:
+          VERSION: ${{ needs.check-version.outputs.version }}
+        run: |
+          set -euo pipefail
+          IFS=, read -ra platforms <<< "$PLATFORMS"
+          for platform in "${platforms[@]}"; do
+            docker buildx build --load --platform "$platform" \
+              --build-arg "QBITTORRENT_VERSION=$VERSION" --tag local/qbittorrent:search-test .
+            bash tests/smoke-search.sh local/qbittorrent:search-test "$platform"
+          done
 
       - name: Login to Docker Hub
         uses: docker/login-action@v4
@@ -98,8 +115,9 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
+          context: .
           file: ./Dockerfile
-          platforms: linux/amd64,linux/arm/v7,linux/arm64
+          platforms: ${{ env.PLATFORMS }}
           push: true
           build-args: |
             QBITTORRENT_VERSION=${{ needs.check-version.outputs.version }}
