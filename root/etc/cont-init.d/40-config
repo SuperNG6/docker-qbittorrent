@@ -1,28 +1,38 @@
 #!/usr/bin/with-contenv bash
 
-if [ "$UT" == "true" ]; then
-    wget --timeout=15 --tries=2 -O /tmp/trackers_list.txt "$TL"
-    Newtrackers="Bittorrent\TrackersList=$(awk '{if(!NF){next}}1' /tmp/trackers_list.txt | sed ':a;N;s/\n/\\n/g;ta')"
-    Oldtrackers="$(grep TrackersList= /config/qBittorrent/config/qBittorrent.conf)"
-    echo $Newtrackers >/tmp/Newtrackers.txt
-
-    if [ -e "/tmp/trackers_list.txt" ]; then
-
-        if [ "$Newtrackers" == "$Oldtrackers" ]; then
-            echo trackers文件一样,不需要更新。
-        else
-            sed -i '/Bittorrent\\TrackersList=/r /tmp/Newtrackers.txt' /config/qBittorrent/config/qBittorrent.conf
-            sed -i '1,/^Bittorrent\\TrackersList=.*/{//d;}' /config/qBittorrent/config/qBittorrent.conf
-            echo 已更新trackers。
-        fi
-
-        rm /tmp/trackers_list.txt
-        rm /tmp/Newtrackers.txt
-
-    else
-        echo 更新文件未正确下载，更新未成功，请检查网络。
-    fi
-
-else
+if [ "$UT" != "true" ]; then
     echo 未设定自动更新trackers。
+    exit 0
+fi
+
+work_dir=$(mktemp -d /tmp/qbittorrent-trackers.XXXXXX) || {
+    echo 无法创建临时目录，跳过trackers更新。
+    exit 0
+}
+trap 'rm -rf -- "$work_dir"' EXIT
+
+tracker_list="$work_dir/trackers.txt"
+config_file=/config/qBittorrent/config/qBittorrent.conf
+
+download_trackers() {
+    timeout -k 1 15 wget -t 1 -O "$tracker_list" -- "$TL" &&
+        grep -q '[^[:space:]]' "$tracker_list"
+}
+
+if ! download_trackers && ! download_trackers; then
+    echo 更新文件未正确下载，跳过trackers更新，请检查网络。
+    exit 0
+fi
+
+new_trackers="Bittorrent\\TrackersList=$(awk '{sub(/\r$/, ""); if (NF) {printf "%s%s", separator, $0; separator="\\n"}}' "$tracker_list")"
+old_trackers=$(grep '^Bittorrent\\TrackersList=' "$config_file")
+
+if [ "$new_trackers" == "$old_trackers" ]; then
+    echo trackers文件一样,不需要更新。
+elif printf '%s\n' "$new_trackers" > "$work_dir/trackers.conf" &&
+    sed -i -e '/^Bittorrent\\TrackersList=/r '"$work_dir/trackers.conf" \
+        -e '/^Bittorrent\\TrackersList=/d' "$config_file"; then
+    echo 已更新trackers。
+else
+    echo 无法写入配置，跳过trackers更新。
 fi
