@@ -1,7 +1,7 @@
 #!/usr/bin/with-contenv bash
 
 if [ "$UT" == "true" ]; then
-    wget -O /tmp/trackers_list.txt $TL
+    wget --timeout=15 --tries=2 -O /tmp/trackers_list.txt "$TL"
     Newtrackers="Bittorrent\TrackersList=$(awk '{if(!NF){next}}1' /tmp/trackers_list.txt | sed ':a;N;s/\n/\\n/g;ta')"
     Oldtrackers="$(grep TrackersList= /config/qBittorrent/config/qBittorrent.conf)"
     echo $Newtrackers >/tmp/Newtrackers.txt
