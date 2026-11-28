@@ -19,7 +19,7 @@ FROM superng6/alpine:3.24.4-s6v3
 ENV TZ=Asia/Shanghai \
     WEBUI_PORT=8080 \
     PUID=1026 PGID=100 UMASK_SET=022\
-    TL=https://cf.trackerslist.com/best.txt \
+    TL=https://cdn.jsdelivr.net/gh/XIU2/TrackersListCollection@master/best.txt \
     UT=true
 
 # add local files and install qbitorrent
